@@ -71,6 +71,7 @@ def create_parser():
     parser.add_argument("--output", default="output/graph.png", type=image_path)
     parser.add_argument("--max-depth", default=3, type=depth)
     parser.add_argument("--exclude", type=nonempty)
+    parser.add_argument("--framework")
     parser.add_argument("--stage", type=int, choices=range(1, 6), default=1)
     return parser
 
