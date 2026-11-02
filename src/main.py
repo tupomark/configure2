@@ -9,6 +9,8 @@ from .config import (
     STAGE_CONFIG, STAGE_NUGET, STAGE_GRAPH, STAGE_REVERSE,
     STAGE_RENDER, parse_arguments,
 )
+from .graph import GraphBuilder, graph_lines
+from .test_repository import TestRepository
 from .nuget import NugetRepository
 
 
@@ -17,6 +19,19 @@ def run_stage2(args):
     repo = NugetRepository(args.repository, args.framework)
     for package, requirement in repo.dependencies(args.package, args.version):
         print(f"{package} {requirement}")
+    return 0
+
+
+def run_stage3(args):
+    """Construct the recursive dependency graph and print its edges."""
+    if args.test_repo:
+        repo = TestRepository(args.repository)
+    else:
+        repo = NugetRepository(args.repository, args.framework)
+    graph = GraphBuilder(repo, args.max_depth, args.exclude).build(
+        args.package, args.version
+    )
+    print("\n".join(graph_lines(graph)))
     return 0
 
 
@@ -30,6 +45,8 @@ def main(argv=None):
     try:
         if args.stage == STAGE_NUGET:
             return run_stage2(args)
+        if args.stage == STAGE_GRAPH:
+            return run_stage3(args)
         print("This stage is not implemented yet", file=sys.stderr)
         return 1
     except (OSError, ValueError, KeyError, ParseError,
