@@ -72,6 +72,7 @@ def create_parser():
     parser.add_argument("--max-depth", default=3, type=depth)
     parser.add_argument("--exclude", type=nonempty)
     parser.add_argument("--framework")
+    parser.add_argument("--reverse", type=package_id)
     parser.add_argument("--stage", type=int, choices=range(1, 6), default=1)
     return parser
 
@@ -96,4 +97,7 @@ def parse_arguments(argv=None):
     validate_source(parser, args)
     if args.test_repo and not re.fullmatch(r"[A-Z]", args.package):
         parser.error("Test packages must use one uppercase Latin letter")
+    if args.test_repo and args.reverse:
+        if not re.fullmatch(r"[A-Z]", args.reverse):
+            parser.error("Reversed test package must be an uppercase letter")
     return args

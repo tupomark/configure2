@@ -10,6 +10,7 @@ from .config import (
     STAGE_RENDER, parse_arguments,
 )
 from .graph import GraphBuilder, graph_lines
+from .reverse import reverse_graph, build_test_universe
 from .test_repository import TestRepository
 from .nuget import NugetRepository
 
@@ -35,6 +36,23 @@ def run_stage3(args):
     return 0
 
 
+def run_stage4(args):
+    """List incoming dependencies in the selected graph universe."""
+    if args.test_repo:
+        graph = build_test_universe(TestRepository(args.repository))
+    else:
+        repo = NugetRepository(args.repository, args.framework)
+        graph = GraphBuilder(repo, args.max_depth, args.exclude).build(
+            args.package, args.version
+        )
+    target = args.reverse or args.package
+    reversed_graph = reverse_graph(
+        graph, target, args.max_depth, args.exclude
+    )
+    print("\n".join(graph_lines(reversed_graph)))
+    return 0
+
+
 def main(argv=None):
     """Select the available stages and return a meaningful exit status."""
     args = parse_arguments(argv)
@@ -47,6 +65,8 @@ def main(argv=None):
             return run_stage2(args)
         if args.stage == STAGE_GRAPH:
             return run_stage3(args)
+        if args.stage == STAGE_REVERSE:
+            return run_stage4(args)
         print("This stage is not implemented yet", file=sys.stderr)
         return 1
     except (OSError, ValueError, KeyError, ParseError,
