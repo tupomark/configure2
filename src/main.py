@@ -12,6 +12,7 @@ from .config import (
 from .graph import GraphBuilder, graph_lines
 from .reverse import reverse_graph, build_test_universe
 from .test_repository import TestRepository
+from .visualize import render_graph
 from .nuget import NugetRepository
 
 
@@ -53,6 +54,24 @@ def run_stage4(args):
     return 0
 
 
+def run_stage5(args):
+    """Save a D2 dependency description and corresponding PNG image."""
+    if args.test_repo:
+        repo = TestRepository(args.repository)
+    else:
+        repo = NugetRepository(args.repository, args.framework)
+    graph = GraphBuilder(repo, args.max_depth, args.exclude).build(
+        args.package, args.version
+    )
+    if args.reverse:
+        graph = reverse_graph(graph, args.reverse, args.max_depth,
+                              args.exclude)
+    source, image = render_graph(graph, args.output)
+    print(f"D2: {source}")
+    print(f"PNG: {image}")
+    return 0
+
+
 def main(argv=None):
     """Select the available stages and return a meaningful exit status."""
     args = parse_arguments(argv)
@@ -67,9 +86,11 @@ def main(argv=None):
             return run_stage3(args)
         if args.stage == STAGE_REVERSE:
             return run_stage4(args)
+        if args.stage == STAGE_RENDER:
+            return run_stage5(args)
         print("This stage is not implemented yet", file=sys.stderr)
         return 1
-    except (OSError, ValueError, KeyError, ParseError,
+    except (OSError, RuntimeError, ValueError, KeyError, ParseError,
             HTTPError, URLError, json.JSONDecodeError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1

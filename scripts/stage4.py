@@ -19,15 +19,15 @@ def run_case(package, depth=3, excluded=None):
 def main():
     """Check incoming consumers, empty incoming graph, and filtering."""
     result = run_case("B")
-    assert result.returncode == 0, result.stderr
+    assert not result.returncode, result.stderr
     assert "EDGE B 1.0.0 -> A 1.0.0" in result.stdout
     assert "EDGE B 1.0.0 -> D 1.0.0" in result.stdout
     assert "EDGE A 1.0.0 -> C 1.0.0" in result.stdout
     empty = run_case("E")
-    assert empty.returncode == 0, empty.stderr
+    assert not empty.returncode, empty.stderr
     assert "EDGE" not in empty.stdout
     filtered = run_case("B", excluded="d")
-    assert filtered.returncode == 0, filtered.stderr
+    assert not filtered.returncode, filtered.stderr
     assert "EDGE B 1.0.0 -> D" not in filtered.stdout
     print("PASS: stage 4")
 

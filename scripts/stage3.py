@@ -18,16 +18,16 @@ def graph_output(fixture, depth, excluded=None):
 def main():
     """Assert cycle preservation, depth limits and case-folded filter."""
     cycle = graph_output("examples/cycle.json", 5)
-    assert cycle.returncode == 0, cycle.stderr
+    assert not cycle.returncode, cycle.stderr
     assert "EDGE C 1.0.0 -> A 1.0.0" in cycle.stdout
     shallow = graph_output("examples/cycle.json", 0)
-    assert shallow.returncode == 0, shallow.stderr
+    assert not shallow.returncode, shallow.stderr
     assert "EDGE" not in shallow.stdout
     filtered = graph_output("examples/cycle.json", 5, "b")
-    assert filtered.returncode == 0, filtered.stderr
+    assert not filtered.returncode, filtered.stderr
     assert "EDGE" not in filtered.stdout
     diamond = graph_output("examples/diamond.json", 3)
-    assert diamond.returncode == 0, diamond.stderr
+    assert not diamond.returncode, diamond.stderr
     assert "EDGE D 1.0.0 -> E 1.0.0" in diamond.stdout
     print("PASS: stage 3")
 
